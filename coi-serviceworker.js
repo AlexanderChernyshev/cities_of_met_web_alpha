@@ -23,6 +23,9 @@ if (typeof window === "undefined") {
                     statusText: response.statusText,
                     headers: newHeaders,
                 });
+            }).catch(e => {
+                console.error("COI-ServiceWorker fetch error:", e);
+                throw e;
             })
         );
     });
@@ -43,7 +46,10 @@ if (typeof window === "undefined") {
         }
 
         if ("serviceWorker" in navigator) {
-            navigator.serviceWorker.register(window.location.pathname).then((registration) => {
+            // Fix: Explicitly point to the script file in the same directory as the HTML
+            const scriptPath = script ? script.src : window.location.pathname + "coi-serviceworker.js";
+            
+            navigator.serviceWorker.register(scriptPath).then((registration) => {
                 console.log("COI-ServiceWorker: ServiceWorker registered", registration.scope);
 
                 registration.addEventListener("updatefound", () => {
@@ -55,6 +61,8 @@ if (typeof window === "undefined") {
                     console.log("COI-ServiceWorker: ServiceWorker active, reloading...");
                     reloader();
                 }
+            }).catch(err => {
+                console.error("COI-ServiceWorker: Registration failed:", err);
             });
         }
     })();
